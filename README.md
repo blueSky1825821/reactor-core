@@ -239,3 +239,7 @@ _Powered by [Reactive Streams Commons](https://github.com/reactor/reactive-strea
 _Licensed under [Apache Software License 2.0](https://www.apache.org/licenses/LICENSE-2.0)_
 
 _Sponsored by [VMware](https://tanzu.vmware.com/)_
+
+## 详细文档
+https://github.com/reactivegroup/sigs/blob/master/sig/reactive/talk/blog/reactor-core%E6%95%B0%E6%8D%AE%E6%B5%81%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1.md
+

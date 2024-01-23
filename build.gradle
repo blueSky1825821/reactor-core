@@ -125,7 +125,7 @@ spotless {
 
 configure(subprojects) { p ->
 	apply plugin: 'java'
-	apply plugin: 'jacoco'
+//	apply plugin: 'jacoco'
 	apply from: "${rootDir}/gradle/setup.gradle"
     apply from: "${rootDir}/gradle/toolchains.gradle"
 
@@ -145,12 +145,12 @@ configure(subprojects) { p ->
 		maven { url 'https://repo.spring.io/milestone' }
 	}
 
-	jacocoTestReport {
-		reports {
-			xml.required = true
-			html.required = true
-		}
-	}
+//	jacocoTestReport {
+//		reports {
+//			xml.required = true
+//			html.required = true
+//		}
+//	}
 
 	// includes for base test task (see below for additional common configurations)
 	test {

@@ -81,7 +81,7 @@ final class ImmediateScheduler implements Scheduler, Scannable {
             if (shutdown) {
                 throw Exceptions.failWithRejected();
             }
-            task.run();
+            task.run();//??同步执行
             return FINISHED;
         }
 

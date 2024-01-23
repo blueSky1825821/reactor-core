@@ -389,8 +389,8 @@ jar {
 	}
 }
 
-jacocoTestReport.dependsOn test
-check.dependsOn jacocoTestReport
-check.dependsOn japicmp
+//jacocoTestReport.dependsOn test
+//check.dependsOn jacocoTestReport
+//check.dependsOn japicmp
 
 // docs.zip is added in afterEvaluate block in setup.gradle

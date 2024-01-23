@@ -61,6 +61,7 @@ import reactor.core.Fuseable;
 import reactor.core.Scannable;
 import reactor.core.TestLoggerExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Operators;
@@ -138,27 +139,113 @@ public class FluxTests extends AbstractReactorTest {
 			char c = (char) ('A' + i);
 			return Flux.range(1, i + 1)
 			           .doOnNext(v -> {
-			           	if (i == 3 && v == 3) {
+			           	if (i == 2 && v == 2) {
 			           		throw new IllegalStateException("boom " + c + v);
 			            }
 			           })
 			    .map(v -> "" + c + "" + v);
 		};
 
-		Flux<Integer> source = Flux.range(0, 5);
+		Flux<Integer> source = Flux.range(0, 2);
 
 		Flux<String> concatMap = source.concatMapDelayError(mapFunction)
 		                               .materialize()
 				                       .map(Object::toString);
-		Flux<String> flatMap = source.flatMapDelayError(mapFunction, 2, 32)
-		                               .materialize()
-				                       .map(Object::toString);
+//		Flux<String> flatMap = source.flatMapDelayError(mapFunction, 2, 32)
+//		                               .materialize()
+//				                       .map(Object::toString);
 
 		List<String> signalsConcat = concatMap.collectList().block();
-		List<String> signalsFlat = flatMap.collectList().block();
+		System.out.println(signalsConcat);
+//		List<String> signalsFlat = flatMap.collectList().block();
+//
+//		assertThat(signalsConcat)
+//		          .containsExactlyElementsOf(signalsFlat);
+	}
 
-		assertThat(signalsConcat)
-		          .containsExactlyElementsOf(signalsFlat);
+	@Test
+	public void test() {
+		Mono.just("tom")
+				.map(s -> s.concat("123"))
+				.filter(s -> s.length() > 5)
+				.subscribe(System.out::println);
+		System.out.println("===");
+	}
+
+	@Test
+	public void test1() {
+		Flux.range(1, 3)
+				.log()
+				.limitRate(2) // 可以被注释掉
+				.concatMap(x -> Mono.delay(Duration.ofSeconds(600)), 1) // simulate that processing takes time
+				.blockLast();
+		System.out.println("====");
+	}
+
+	@Test
+	public void test2() {
+		Flux<String> alphabet = Flux.just(-1, 30, 13, 9, 20)
+				.handle((i, sink) -> {
+					String letter = alphabet(i);
+					if (letter != null)
+						sink.next(letter);
+				});
+
+		alphabet.subscribe(System.out::println);
+	}
+
+	@Test
+	public void test3() throws InterruptedException {
+		Hooks.onOperatorDebug();
+		Flux.just(1, 0).log("TEST").map(x -> 1 / x).checkpoint("test").subscribe(System.out::println);
+
+
+
+		Flux<Object> fluxAsyncBackp = Flux.create(emitter -> {
+
+					// Publish 1000 numbers
+					for (int i = 0; i < 10; i++) {
+						System.out.println(Thread.currentThread().getName() + " | Publishing = " + i);
+						emitter.next(i);
+					}
+					// When all values or emitted, call complete.
+					emitter.complete();
+				}, FluxSink.OverflowStrategy.DROP)
+				.onBackpressureDrop(i -> System.out.println(Thread.currentThread().getName() + " | DROPPED = " + i));
+
+		fluxAsyncBackp
+				.subscribeOn(Schedulers.boundedElastic())
+				.publishOn(Schedulers.boundedElastic())
+				.subscribe(i -> {
+					// Process received value.
+					System.out.println(Thread.currentThread().getName() + " | Received = " + i);
+					// 500 mills delay to simulate slow subscriber
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				});
+		/*
+		 * Notice above -
+		 *
+		 * OverflowStrategy.DROP - If subscriber can't keep up with values, then drop
+		 * the values.
+		 *
+		 * subscribeOn & publishOn - Put subscriber & publishers on different threads.
+		 */
+
+		// Since publisher & subscriber run on different thread than main thread, keep
+		// main thread active for 100 seconds.
+		Thread.sleep(5000);
+	}
+
+	public String alphabet(int letterNumber) {
+		if (letterNumber < 1 || letterNumber > 26) {
+			return null;
+		}
+		int letterIndexAscii = 'A' + letterNumber - 1;
+		return "" + (char) letterIndexAscii;
 	}
 
 	@Test

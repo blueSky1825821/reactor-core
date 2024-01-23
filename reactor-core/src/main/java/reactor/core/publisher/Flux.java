@@ -8755,7 +8755,7 @@ public abstract class Flux<T> implements CorePublisher<T> {
 			subscriber = new FluxHide.SuppressFuseableSubscriber<>(subscriber);
 		}
 
-		try {
+		try {//递归转循环遍历
 			if (publisher instanceof OptimizableOperator) {
 				OptimizableOperator operator = (OptimizableOperator) publisher;
 				while (true) {

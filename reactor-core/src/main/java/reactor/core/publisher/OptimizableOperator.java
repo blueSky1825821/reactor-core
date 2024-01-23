@@ -38,6 +38,8 @@ interface OptimizableOperator<IN, OUT> extends CorePublisher<IN> {
 	 * subscription encapsulation by returning null. This can be used in conjunction with {@link #nextOptimizableSource()}
 	 * to perform subscription in a loop instead of by recursion.
 	 *
+	 * 递归转循环
+	 *
 	 * @return next {@link CoreSubscriber} or "null" if the subscription was already done inside the method
 	 */
 	@Nullable
